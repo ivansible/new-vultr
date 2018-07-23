@@ -3,8 +3,51 @@
 - setup:
   become: no
 
-# use import to become root globally
-- name: become root
-  import_tasks: root.yml
-  become: yes
+- set_fact:
+    vr_name: "{{ vultr_name }}"
+    vr_os: "{{ vultr_os_dic.get(vultr_os|lower, vultr_os) }}"
+    vr_region: "{{ vultr_region_dic.get(vultr_region|upper, vultr_region) }}"
+    vr_plan: "{{ vultr_plan_dic.get(vultr_plan, vultr_plan) }}"
+    vr_invename: "{{ vultr_name if vultr_inventory == true
+                     else '' if (vultr_inventory | bool == false)
+                     else vultr_inventory }}"
+
+- name: initialize local vultr.ini
+  copy:
+    dest: ~/.vultr.ini
+    content: |
+      [default]
+  connection: localhost
+
+- name: upload ssh key
+  vr_ssh_key:
+    name: "{{ vultr_ssh_key_name }}"
+    ssh_key: "{{ lookup('pipe', 'ssh-keygen -y -f ' + vultr_ssh_key_file) }}"
+  connection: local
+  when: vultr_ssh_key_file != '' and vultr_ssh_key_name != ''
+
+- name: create vultr server
+  vr_server:
+    api_account: default
+    api_key: "{{ vultr_api_key }}"
+    name: "{{ vr_name }}"
+    os: "{{ vr_os }}"
+    plan: "{{ vr_plan }}"
+    region: "{{ vr_region }}"
+    ssh_keys: "{{ vultr_ssh_key_name }}"
+    state: started
+    validate_certs: no
+  connection: localhost
+  register: vr_server_result
+
+- debug:
+    var: vr_server_result
+
+- name: register new host in the ansible inventory
+  lineinfile:
+    path: "{{ vultr_inventory_file }}"
+    regexp: "^{{ vr_invename }} "
+    line: "{{ vr_invename }}    ansible_host={{ vr_server_result.vultr_server.v4_main_ip }}"
+  connection: localhost
+  when: vr_invename != '' and vultr_inventory_file != ''
 ...

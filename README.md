@@ -1,7 +1,5 @@
 # ivansible.new-vultr
-This role performs:
- - action1;
- - action2;
+This role creates a new Vultr box
 
 
 ## Requirements
