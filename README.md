@@ -47,9 +47,11 @@ Name for this SSH key to register with Vultr.
 - `vr_setup`
 - `vr_facts`
 - `vr_ini`
-- `vr_ssh`
+- `vr_ssh_key`
+- `vr_script`
 - `vr_server`
 - `vr_inven`
+- `vr_info`
 
 
 ## Dependencies
