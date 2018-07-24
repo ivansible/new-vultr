@@ -9,7 +9,7 @@
     vr_name: "{{ vultr_name }}"
     vr_os: "{{ vultr_os_dic.get(vultr_os|lower, vultr_os) }}"
     vr_region: "{{ vultr_region_dic.get(vultr_region|upper, vultr_region) }}"
-    vr_plan: "{{ vultr_plan_dic.get(vultr_plan, vultr_plan) }}"
+    vr_plan: "{{ vultr_plan_dic.get(vultr_plan|string, vultr_plan) }}"
     vr_invename: "{{ vultr_name if (vultr_inventory in (1,'on','yes','true'))
                      else '' if (vultr_inventory | bool == false)
                      else vultr_inventory }}"
