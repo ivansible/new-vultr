@@ -2,6 +2,7 @@
 # perform setup as a non-root user
 - setup:
   become: no
+  tags: vr_setup
 
 - set_fact:
     vr_name: "{{ vultr_name }}"
@@ -11,6 +12,7 @@
     vr_invename: "{{ vultr_name if (vultr_inventory in (1,'on','yes','true'))
                      else '' if (vultr_inventory | bool == false)
                      else vultr_inventory }}"
+  tags: vr_facts
 
 - name: initialize local vultr.ini
   copy:
@@ -18,6 +20,7 @@
     content: |
       [default]
   connection: localhost
+  tags: vr_ini
 
 - name: upload ssh key
   vr_ssh_key:
@@ -25,6 +28,7 @@
     ssh_key: "{{ lookup('pipe', 'ssh-keygen -y -f ' + vultr_ssh_key_file) }}"
   connection: local
   when: vultr_ssh_key_file != '' and vultr_ssh_key_name != ''
+  tags: vr_ssh
 
 - name: create vultr server
   vr_server:
@@ -39,9 +43,8 @@
     validate_certs: no
   connection: localhost
   register: vr_server_result
+  tags: vr_server
 
-- debug:
-    var: vr_server_result
 
 - name: register new host in the ansible inventory
   lineinfile:
@@ -50,4 +53,5 @@
     line: "{{ vr_invename }}    ansible_host={{ vr_server_result.vultr_server.v4_main_ip }}"
   connection: localhost
   when: vr_invename != '' and vultr_inventory_file != ''
+  tags: vr_inven
 ...

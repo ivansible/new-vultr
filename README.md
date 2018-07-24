@@ -11,13 +11,36 @@ None
 
 Available variables are listed below, along with default values.
 
-    variable1: 1
-    variable2: 2
+    vultr_name: vultr1
+Host name for new server.
+
+    vultr_os: xenial
+OS to install: `xenial` or `bionic`
+
+    vultr_plan: 5
+Plan: `$5` or `$10` or full name of the plan
+
+    vultr_region: ams
+Region: `ams` for `Amsterdam`, `ny` for `New York` or full region name.
+
+    vultr_inventory: yes
+Can be `yes` or `no` or full inventory host name.
+
+    vultr_ssh_key_file: ""
+Path to the private SSH key file. Public key will be registered with Vultr.
+
+    vultr_ssh_key_name: derived from `ssh_key_file`
+Name for this SSH key to register with Vultr.
+
 
 ## Tags
 
-- `role1_tag1` -- action1
-- `role1_tag2` -- action2
+- `vr_setup`
+- `vr_facts`
+- `vr_ini`
+- `vr_ssh`
+- `vr_server`
+- `vr_inven`
 
 
 ## Dependencies
@@ -27,13 +50,20 @@ None
 
 ## Example Playbook
 
-    - hosts: vagrant-boxes
-      strategy: linear
+    - hosts: localhost  # the host is controller
       roles:
          - role: ivansible.new-vultr
-           variable1: 1
-           variable2: 2
+           vultr_name=vultr1
+           vultr_os=xenial
+           vultr_plan=5
+           vultr_region=ams
+           vultr_inventory=yes
 
+
+## Testing
+
+    ./scripts/vultr.sh list|ls plans|regions
+    ./scripts/vultr.sh new <name> [-os xenial|bionic] [-plan 5|10] [-region ams|ny] [-inven yes|no|<name>] [options...]
 
 ## License
 
