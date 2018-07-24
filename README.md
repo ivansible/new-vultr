@@ -26,6 +26,15 @@ Region: `ams` for `Amsterdam`, `ny` for `New York` or full region name.
     vultr_inventory: yes
 Can be `yes` or `no` or full inventory host name.
 
+    vultr_ssh_port: 22
+SSH port
+
+    vultr_username: ubuntu
+Username for login
+
+    vultr_uid
+Desired `id` for new user
+
     vultr_ssh_key_file: ""
 Path to the private SSH key file. Public key will be registered with Vultr.
 
