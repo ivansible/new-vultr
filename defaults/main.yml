@@ -1,7 +1,7 @@
 ---
 # defaults file for ivansible.new-vultr
 
-vultr_name: test1
+vultr_name: vultr1
 vultr_os: xenial
 vultr_plan: 5
 vultr_region: ams
@@ -18,10 +18,14 @@ vultr_os_dic:
   bionic: "Ubuntu 18.04 x64"
 
 vultr_region_dic:
+  ams: "Amsterdam"
   AMS: "Amsterdam"
-  NY: "New York"
+  ny:  "New York"
+  NY:  "New York"
 
 vultr_plan_dic:
-  5: "1024 MB RAM,25 GB SSD,1.00 TB BW"
-  10: "2048 MB RAM,40 GB SSD,2.00 TB BW"
+  5:    "1024 MB RAM,25 GB SSD,1.00 TB BW"
+  "5":  "1024 MB RAM,25 GB SSD,1.00 TB BW"
+  10:   "2048 MB RAM,40 GB SSD,2.00 TB BW"
+  "10": "2048 MB RAM,40 GB SSD,2.00 TB BW"
 ...
