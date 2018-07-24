@@ -4,6 +4,7 @@
   become: no
   tags: vr_setup
 
+
 - set_fact:
     vr_name: "{{ vultr_name }}"
     vr_os: "{{ vultr_os_dic.get(vultr_os|lower, vultr_os) }}"
@@ -12,7 +13,16 @@
     vr_invename: "{{ vultr_name if (vultr_inventory in (1,'on','yes','true'))
                      else '' if (vultr_inventory | bool == false)
                      else vultr_inventory }}"
+    vr_ssh_key_name: "{{ vultr_ssh_key_name }}"
+    vr_ssh_key_pub: "{{ lookup('pipe', 'ssh-keygen -y -f ' + vultr_ssh_key_file) }}"
+    vr_ssh_port: "{{ vultr_ssh_port }}"
+    vr_username: "{{ vultr_username }}"
+    vr_uid: "{{ vultr_uid }}"
+    vr_script_name: enter-{{ vultr_ssh_port }}-{{ vultr_username }}-{{ vultr_uid }}.sh
+    vr_authkeys: /home/{{ vultr_username }}/.ssh/authorized_keys
+    vr_sudoers_d: /etc/sudoers.d/99_{{ vultr_username }}
   tags: vr_facts
+
 
 - name: initialize local vultr.ini
   copy:
@@ -22,13 +32,49 @@
   connection: localhost
   tags: vr_ini
 
+
 - name: upload ssh key
   vr_ssh_key:
-    name: "{{ vultr_ssh_key_name }}"
-    ssh_key: "{{ lookup('pipe', 'ssh-keygen -y -f ' + vultr_ssh_key_file) }}"
+    name: "{{ vr_ssh_key_name }}"
+    ssh_key: "{{ vr_ssh_key_pub }}"
   connection: local
   when: vultr_ssh_key_file != '' and vultr_ssh_key_name != ''
-  tags: vr_ssh
+  tags: vr_ssh_key
+
+
+- name: upload startup script
+  vr_startup_script:
+    name: "{{ vr_script_name }}"
+    script: |
+      #!/bin/bash
+      ### save our public ssh key
+      ssh_key_pub="{{ vr_ssh_key_pub }}"
+      ### change ssh port
+      sed -i /etc/ssh/sshd_config -e 's/^Port [0-9].*/Port {{vr_ssh_port}}/'
+      systemctl restart ssh
+      ### install our public ssh key for root
+      mkdir -p /root/.ssh/
+      echo "$ssh_key_pub" > /root/.ssh/authorized_keys
+      chown root:root /root/.ssh/authorized_keys
+      chmod 600 /root/.ssh/authorized_keys
+      ### create our user
+      useradd -m -u {{ vr_uid }} {{ vr_username }}
+      ### install our public ssh key for user
+      mkdir -p {{ vr_authkeys | dirname }}
+      touch {{ vr_authkeys }}
+      echo "$ssh_key_pub" >> {{ vr_authkeys }}
+      chown -R {{ vr_uid }}:{{ vr_uid }} {{ vr_authkeys | dirname }}
+      chmod 600 {{ vr_authkeys }}
+      ### remove requiretty from sudoers
+      sed -i /etc/sudoers -e '/^Defaults\s+requiretty/d'
+      ### enable sudoers for our user
+      echo "{{ vr_username }} ALL=(ALL) NOPASSWD:ALL" > {{ vr_sudoers_d }}
+      chown root:root {{ vr_sudoers_d }}
+      chmod 440 {{ vr_sudoers_d }}
+      ### install python
+      apt-get install -qqy python python3
+  tags: vr_script
+
 
 - name: create vultr server
   vr_server:
@@ -38,7 +84,8 @@
     os: "{{ vr_os }}"
     plan: "{{ vr_plan }}"
     region: "{{ vr_region }}"
-    ssh_keys: "{{ vultr_ssh_key_name }}"
+    ssh_key: "{{ vr_ssh_key_name }}"
+    startup_script: "{{ vr_script_name }}"
     state: started
     validate_certs: no
   connection: localhost
@@ -46,12 +93,23 @@
   tags: vr_server
 
 
+- set_fact:
+    vr_inven_entry: "ansible_host={{ vr_server_result.vultr_server.v4_main_ip }} ansible_port={{ vr_ssh_port }} ansible_user={{ vr_username }}"
+
+
 - name: register new host in the ansible inventory
   lineinfile:
     path: "{{ vultr_inventory_file }}"
     regexp: "^{{ vr_invename }} "
-    line: "{{ vr_invename }}    ansible_host={{ vr_server_result.vultr_server.v4_main_ip }}"
+    line: "{{ vr_invename }}    {{ vr_inven_entry }}"
   connection: localhost
   when: vr_invename != '' and vultr_inventory_file != ''
   tags: vr_inven
+
+
+- debug:
+    msg:
+      - "Inventory entry for your new host:"
+      - "{{ vr_invename }}    {{ vr_inven_entry }}"
+  tags: vr_info
 ...

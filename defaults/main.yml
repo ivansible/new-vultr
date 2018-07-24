@@ -7,6 +7,9 @@ vultr_plan: 5
 vultr_region: ams
 vultr_inventory: yes
 
+vultr_ssh_port: 22
+vultr_username: ubuntu
+vultr_uid: 1000
 
 vultr_inventory_file: ""
 
