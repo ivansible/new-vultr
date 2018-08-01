@@ -47,6 +47,7 @@
     name: "{{ vr_script_name }}"
     script: |
       #!/bin/bash
+      echo "script started"
       ### save our public ssh key
       ssh_key_pub="{{ vr_ssh_key_pub }}"
       ### change ssh port
@@ -72,7 +73,14 @@
       chown root:root {{ vr_sudoers_d }}
       chmod 440 {{ vr_sudoers_d }}
       ### install python
+      export DEBIAN_FRONTEND=noninteractive
       apt-get install -qqy python python3
+      ### set random {{ vr_username }}/root password
+      random_pass=$(head -c4096 /dev/urandom | md5sum | cut -d' ' -f1)
+      echo "{{ vr_username }}:$random_pass" | chpasswd
+      echo "root:$random_pass" | chpasswd
+      #echo "note: setting {{ vr_username }}/root password to $random_pass" 1>&2
+      echo "script complete"
   tags: vr_script
 
 
