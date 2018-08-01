@@ -50,7 +50,7 @@
       ### save our public ssh key
       ssh_key_pub="{{ vr_ssh_key_pub }}"
       ### change ssh port
-      sed -i /etc/ssh/sshd_config -e 's/^Port [0-9].*/Port {{vr_ssh_port}}/'
+      sed -i /etc/ssh/sshd_config -E -e 's/^#?Port [0-9].*/Port {{vr_ssh_port}}/'
       systemctl restart ssh
       ### install our public ssh key for root
       mkdir -p /root/.ssh/
@@ -66,7 +66,7 @@
       chown -R {{ vr_uid }}:{{ vr_uid }} {{ vr_authkeys | dirname }}
       chmod 600 {{ vr_authkeys }}
       ### remove requiretty from sudoers
-      sed -i /etc/sudoers -e '/^Defaults\s+requiretty/d'
+      sed -i /etc/sudoers -E -e '/^Defaults\s+requiretty/d'
       ### enable sudoers for our user
       echo "{{ vr_username }} ALL=(ALL) NOPASSWD:ALL" > {{ vr_sudoers_d }}
       chown root:root {{ vr_sudoers_d }}
