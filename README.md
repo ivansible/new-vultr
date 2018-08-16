@@ -1,4 +1,5 @@
-# ivansible.new-vultr
+# ivansible.new_vultr
+
 This role creates a new Vultr box
 
 
@@ -63,7 +64,7 @@ None
 
     - hosts: localhost  # the host is controller
       roles:
-         - role: ivansible.new-vultr
+         - role: ivansible.new_vultr
            vultr_name=vultr1
            vultr_os=xenial
            vultr_plan=5

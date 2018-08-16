@@ -2,7 +2,7 @@
 dependencies: []
 
 galaxy_info:
-
+  role_name: new_vultr
   author: "Ivan Andreev"
   description: "create a new Vultr box"
   company: "IvanSible"
