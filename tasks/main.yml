@@ -21,7 +21,7 @@
 
 - name: initialize local vultr.ini
   copy:
-    dest: ~/.vultr.ini
+    dest: "{{ ansible_user_dir }}/.vultr.ini"
     content: |
       [default]
   connection: localhost
