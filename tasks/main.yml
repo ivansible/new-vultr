@@ -1,17 +1,18 @@
 ---
-# perform setup as a non-root user
-- setup:
+- name: perform setup as a non-root user
+  setup:
   become: no
   tags: vr_setup
 
 
-- set_fact:
+- name: record server parameters
+  set_fact:
     vr_name: "{{ vultr_name }}"
     vr_os: "{{ vultr_os_dic.get(vultr_os|lower, vultr_os) }}"
     vr_region: "{{ vultr_region_dic.get(vultr_region|upper, vultr_region) }}"
     vr_plan: "{{ vultr_plan_dic.get(vultr_plan|string, vultr_plan) }}"
     vr_invename: "{{ vultr_name if (vultr_inventory in (1,'on','yes','true'))
-                     else '' if (vultr_inventory | bool == false)
+                     else '' if (not vultr_inventory |bool)
                      else vultr_inventory }}"
     vr_ssh_key_name: "{{ vultr_ssh_key_name }}"
     vr_ssh_key_pub: "{{ lookup('pipe', 'ssh-keygen -y -f ' + vultr_ssh_key_file) }}"
@@ -34,7 +35,7 @@
 
 
 - name: upload ssh key
-  vr_ssh_key:
+  vultr_ssh_key:
     name: "{{ vr_ssh_key_name }}"
     ssh_key: "{{ vr_ssh_key_pub }}"
   connection: local
@@ -43,7 +44,7 @@
 
 
 - name: upload startup script
-  vr_startup_script:
+  vultr_startup_script:
     name: "{{ vr_script_name }}"
     script: |
       #!/bin/bash
@@ -51,7 +52,7 @@
       ### save our public ssh key
       ssh_key_pub="{{ vr_ssh_key_pub }}"
       ### change ssh port
-      sed -i /etc/ssh/sshd_config -E -e 's/^#?Port [0-9].*/Port {{vr_ssh_port}}/'
+      sed -i /etc/ssh/sshd_config -E -e 's/^#?Port [0-9].*/Port {{ vr_ssh_port }}/'
       systemctl restart ssh
       ### install our public ssh key for root
       mkdir -p /root/.ssh/
@@ -76,7 +77,7 @@
       export DEBIAN_FRONTEND=noninteractive
       apt-get install -qqy python python3
       ### set random {{ vr_username }}/root password
-      random_pass=$(head -c4096 /dev/urandom | md5sum | cut -d' ' -f1)
+      random_pass=$(head -c4096 /dev/urandom | md5sum | cut -d" " -f1)
       echo "{{ vr_username }}:$random_pass" | chpasswd
       echo "root:$random_pass" | chpasswd
       #echo "note: setting {{ vr_username }}/root password to $random_pass" 1>&2
@@ -85,7 +86,7 @@
 
 
 - name: create vultr server
-  vr_server:
+  vultr_server:
     api_account: default
     api_key: "{{ vultr_api_key }}"
     name: "{{ vr_name }}"
@@ -101,7 +102,8 @@
   tags: vr_server
 
 
-- set_fact:
+- name: record ip/port/user of new server
+  set_fact:
     vr_inven_entry: "ansible_host={{ vr_server_result.vultr_server.v4_main_ip }} ansible_port={{ vr_ssh_port }} ansible_user={{ vr_username }}"
 
 
