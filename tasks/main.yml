@@ -1,10 +1,4 @@
 ---
-- name: perform setup as a non-root user
-  setup:
-  become: no
-  tags: vr_setup
-
-
 - name: record server parameters
   set_fact:
     vr_name: "{{ vultr_name }}"

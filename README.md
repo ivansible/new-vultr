@@ -45,7 +45,6 @@ Name for this SSH key to register with Vultr.
 
 ## Tags
 
-- `vr_setup`
 - `vr_facts`
 - `vr_ini`
 - `vr_ssh_key`
