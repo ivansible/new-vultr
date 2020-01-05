@@ -18,6 +18,7 @@ galaxy_info:
   galaxy_tags:
     - linux
     - vultr
+    - hosting
 
   github_branch: master
 ...

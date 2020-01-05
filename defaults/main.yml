@@ -1,11 +1,11 @@
 ---
-# defaults file for ivansible.new_vultr
+# defaults for ivansible.new_vultr
 
 vultr_name: vultr1
-vultr_os: xenial
+vultr_os: bionic
 vultr_plan: 5
 vultr_region: ams
-vultr_inventory: yes
+vultr_inventory: true
 
 vultr_ssh_port: 22
 vultr_username: ubuntu
@@ -13,20 +13,20 @@ vultr_uid: 1000
 
 vultr_inventory_file: ""
 
-vultr_ssh_key_file: ""
-vultr_ssh_key_name: "{{ (vultr_ssh_key_file | basename | splitext).0 }}"
+vultr_key_file: ""
+vultr_key_name: "{{ (vultr_ssh_key_file |basename |splitext)[0] }}"
 
-vultr_os_dic:
+vultr_os_map:
   xenial: "Ubuntu 16.04 x64"
   bionic: "Ubuntu 18.04 x64"
 
-vultr_region_dic:
+vultr_region_map:
   ams: "Amsterdam"
   AMS: "Amsterdam"
   ny: "New York"
   NY: "New York"
 
-vultr_plan_dic:
+vultr_plan_map:
   "5": "1024 MB RAM,25 GB SSD,1.00 TB BW"
   "10": "2048 MB RAM,40 GB SSD,2.00 TB BW"
 ...
