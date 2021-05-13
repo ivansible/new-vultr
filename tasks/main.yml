@@ -30,6 +30,7 @@
     dest: "{{ ansible_user_dir }}/.vultr.ini"
     content: |
       [default]
+    mode: 0644
   connection: localhost
   tags:
     - vr_ini
@@ -97,7 +98,8 @@
     - vr_all
 
 
-- debug:
+- name: print new inventory entry
+  debug:
     msg:
       - "Inventory entry for your new host:"
       - "{{ vr_invename }}    {{ vr_inven_entry }}"

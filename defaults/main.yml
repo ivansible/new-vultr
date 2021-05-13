@@ -14,7 +14,7 @@ vultr_uid: 1000
 vultr_inventory_file: ""
 
 vultr_key_file: ""
-vultr_key_name: "{{ (vultr_ssh_key_file |basename |splitext)[0] }}"
+vultr_key_name: "{{ vultr_ssh_key_file |basename |splitext |first }}"
 
 vultr_os_map:
   xenial: "Ubuntu 16.04 x64"
